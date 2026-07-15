@@ -70,8 +70,8 @@ RUN pip install scikit-learn
 RUN python3 -m venv --system-site-packages "$REPO_DIR"/rumros/webapp/venv
 
 # Clone repository
-RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
-    && cd "$REPO_DIR"/rumros \
+RUN [ -d "$REPO_DIR"/rumros ] || git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros
+RUN cd "$REPO_DIR"/rumros \
     && git pull
 
 # Install ARGoS
@@ -83,8 +83,8 @@ RUN cd /usr/lib/x86_64-linux-gnu \
     && ln -s libglut.so.3.12.0 libglut.so.3
 
 # Install Turtlebot plugin for ARGoS
+RUN [ -d "$REPO_DIR"/argos3-turtlebot3 ] || git clone https://github.com/ilpincy/argos3-turtlebot3.git "$REPO_DIR"/argos3-turtlebot3
 RUN cd "$REPO_DIR" \
-    && git clone https://github.com/ilpincy/argos3-turtlebot3.git \
     && cd argos3-turtlebot3 \
     && mkdir build \
     && cd build \
@@ -94,8 +94,8 @@ RUN cd "$REPO_DIR" \
     && ln -s /usr/lib/argos3 /usr/local/lib/argos3
 
 # Install Crazyflie plugin for ARGoS
+RUN [ -d "$REPO_DIR"/argos3-crazyflie ] || git clone https://gitlab.com/uniluxembourg/snt/pcog/adars/crazyflie.git "$REPO_DIR"/argos3-crazyflie
 RUN cd "$REPO_DIR" \
-    && git clone https://gitlab.com/uniluxembourg/snt/pcog/adars/crazyflie.git \
     && cd crazyflie \
     && mkdir build \
     && cd build \
@@ -104,9 +104,10 @@ RUN cd "$REPO_DIR" \
     && make install
 
 # Build ROS workspace
-RUN cd "$REPO_DIR"/rumros/ros/rumros_swarm_ws \
-    && source /opt/ros/"$ROS_DISTRO"/setup.bash \
-    && colcon build
+# Causes issues in binder, let the launch script do it the first time
+#RUN cd "$REPO_DIR"/rumros/ros/rumros_swarm_ws \
+#    && source /opt/ros/"$ROS_DISTRO"/setup.bash \
+#    && colcon build
 
 # Setup webapp
 RUN source "$REPO_DIR"/rumros/webapp/venv/bin/activate \
