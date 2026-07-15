@@ -52,7 +52,8 @@ SHELL [ "/bin/bash" , "-c" ]
 RUN python3 -m venv /app/venv
 
 # Clone repository
-RUN git clone https://github.com/sebastiangoetz/RuMROS.git /app/rumros
+RUN git clone https://github.com/sebastiangoetz/RuMROS.git /app/rumros \
+    && git pull
 
 # Install ARGoS
 RUN cd /app/rumros/dependencies \

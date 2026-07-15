@@ -1,7 +1,7 @@
 
 # RuMROS-Binder
 
-[![Binder](https://binder.intel4coro.de/badge_logo.svg)](https://binder.intel4coro.de/v2/gh/akassuba/rumros-binder/HEAD)
+[![Binder](https://binder.intel4coro.de/badge_logo.svg)](https://binder.intel4coro.de/v2/gh/akassuba/rumros-binder/HEAD?labpath=notebooks%2Finstructions.ipynb)
 
 ## Introduction
 
