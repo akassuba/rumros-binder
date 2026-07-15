@@ -53,6 +53,7 @@ RUN python3 -m venv /app/venv
 
 # Clone repository
 RUN git clone https://github.com/sebastiangoetz/RuMROS.git /app/rumros \
+    && cd /app/rumros \
     && git pull
 
 # Install ARGoS
