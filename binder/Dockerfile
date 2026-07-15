@@ -4,7 +4,8 @@ FROM intel4coro/jupyter-ros2:jazzy-py3.12
 USER root
 ENV PATH=$HOME/.local/bin:$PATH
 
-EXPOSE 1883
+EXPOSE 1883 # MQTT
+EXPOSE 5000 # Web interface
 
 ENV REPO_DIR=/app
 
@@ -64,9 +65,6 @@ RUN cd "$REPO_DIR"/rumros/dependencies \
 # Link libglut for ARGoS (ARGoS compiled for Ubuntu 22.04, where this path is different)
 RUN cd /usr/lib/x86_64-linux-gnu \
     && ln -s libglut.so.3.12.0 libglut.so.3
-
-# Enable mosquitto
-RUN systemctl enable mosquitto.service
 
 # Install Turtlebot plugin for ARGoS
 RUN cd "$REPO_DIR" \
