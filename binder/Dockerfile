@@ -5,8 +5,20 @@ USER root
 ENV PATH=$HOME/.local/bin:$PATH
 
 EXPOSE 1883
-#============= Install extra software packages =============#
 
+ENV REPO_DIR=/app
+
+# Copy content to the image
+COPY . ${REPO_DIR}/
+RUN git config --global --add safe.directory ${REPO_DIR}
+
+# Set JupyterLab default directory
+WORKDIR ${REPO_DIR}
+
+# Set VSCODE default directory
+ENV CODE_WORKING_DIRECTORY=${REPO_DIR}
+
+#============= Install extra software packages =============#
 # Set ROS distribution to use
 ENV ROS_DISTRO='jazzy'
 RUN echo 'export ROS_DISTRO=$ROS_DISTRO' >> ~/.bashrc && echo 'source /opt/ros/$ROS_DISTRO/setup.bash' >> ~/.bashrc
@@ -49,15 +61,15 @@ RUN apt-get install -y \
 SHELL [ "/bin/bash" , "-c" ]
 
 # Create Python venv
-RUN python3 -m venv /app/venv
+RUN python3 -m venv "$REPO_DIR"/venv
 
 # Clone repository
-RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git /app/rumros \
-    && cd /app/rumros \
+RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
+    && cd "$REPO_DIR"/rumros \
     && git pull
 
 # Install ARGoS
-RUN cd /app/rumros/dependencies \
+RUN cd "$REPO_DIR"/rumros/dependencies \
     && apt-get install -y ./argos3_simulator-3.0.0-x86_64-beta59.deb
 
 # Link libglut for ARGoS (ARGoS compiled for Ubuntu 22.04, where this path is different)
@@ -65,7 +77,7 @@ RUN cd /usr/lib/x86_64-linux-gnu \
     && ln -s libglut.so.3.12.0 libglut.so.3
 
 # Install Turtlebot plugin for ARGoS
-RUN cd /app \
+RUN cd "$REPO_DIR" \
     && git clone https://github.com/ilpincy/argos3-turtlebot3.git \
     && cd argos3-turtlebot3 \
     && mkdir build \
@@ -76,7 +88,7 @@ RUN cd /app \
     && ln -s /usr/lib/argos3 /usr/local/lib/argos3
 
 # Install Crazyflie plugin for ARGoS
-RUN cd /app \
+RUN cd "$REPO_DIR" \
     && git clone https://gitlab.com/uniluxembourg/snt/pcog/adars/crazyflie.git \
     && cd crazyflie \
     && mkdir build \
@@ -86,13 +98,13 @@ RUN cd /app \
     && make install
 
 # Build ROS workspace
-RUN cd /app/rumros/ros/rumros_swarm_ws \
+RUN cd "$REPO_DIR"/rumros/ros/rumros_swarm_ws \
     && source /opt/ros/"$ROS_DISTRO"/setup.bash \
     && colcon build
 
 # Setup webapp
-RUN source /app/venv/bin/activate \
-    && pip install -r /app/rumros/webapp/requirements.txt
+RUN source "$REPO_DIR"/venv/bin/activate \
+    && pip install -r "$REPO_DIR"/rumros/webapp/requirements.txt
 
 # The entrypoint of the docker image
 COPY binder/entrypoint.sh /entrypoint.sh
