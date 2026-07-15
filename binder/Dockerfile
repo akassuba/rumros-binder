@@ -17,6 +17,8 @@ RUN echo 'export ROS_DISTRO=$ROS_DISTRO' >> ~/.bashrc && echo 'source /opt/ros/$
 
 # Install Requirements
 RUN apt-get update && apt-get install apt-utils -y
+# https://github.com/wise-vision/ros2_mcp/issues/46
+RUN apt-get upgrade ros-jazzy-rosidl-typesupport-fastrtps-cpp -y
 RUN apt-get install -y \
     nano \
     python3.12 \
