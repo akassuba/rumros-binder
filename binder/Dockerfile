@@ -8,16 +8,6 @@ EXPOSE 1883
 
 ENV REPO_DIR=/app
 
-# Copy content to the image
-COPY . ${REPO_DIR}/
-RUN git config --global --add safe.directory ${REPO_DIR}
-
-# Set JupyterLab default directory
-WORKDIR ${REPO_DIR}
-
-# Set VSCODE default directory
-ENV CODE_WORKING_DIRECTORY=${REPO_DIR}
-
 #============= Install extra software packages =============#
 # Set ROS distribution to use
 ENV ROS_DISTRO='jazzy'
@@ -60,19 +50,12 @@ RUN apt-get install -y \
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
 
-# Enable mosquitto
-RUN systemctl enable mosquitto.service
+# Clone repository
+RUN git clone -b main https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
+    && cd "$REPO_DIR"/rumros
 
 # Install sklearn (binder container doesn't seem to work with apt version)
 RUN pip install scikit-learn
-
-# Create Python venv
-RUN python3 -m venv --system-site-packages "$REPO_DIR"/rumros/webapp/venv
-
-# Clone repository
-RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
-    && cd "$REPO_DIR"/rumros \
-    && git pull
 
 # Install ARGoS
 RUN cd "$REPO_DIR"/rumros/dependencies \
@@ -81,6 +64,9 @@ RUN cd "$REPO_DIR"/rumros/dependencies \
 # Link libglut for ARGoS (ARGoS compiled for Ubuntu 22.04, where this path is different)
 RUN cd /usr/lib/x86_64-linux-gnu \
     && ln -s libglut.so.3.12.0 libglut.so.3
+
+# Enable mosquitto
+RUN systemctl enable mosquitto.service
 
 # Install Turtlebot plugin for ARGoS
 RUN cd "$REPO_DIR" \
@@ -110,8 +96,20 @@ RUN cd "$REPO_DIR" \
 #    && colcon build
 
 # Setup webapp
+# Create Python venv
+RUN python3 -m venv --system-site-packages "$REPO_DIR"/rumros/webapp/venv
 RUN source "$REPO_DIR"/rumros/webapp/venv/bin/activate \
     && pip install -r "$REPO_DIR"/rumros/webapp/requirements.txt
+
+# Copy content to the image
+COPY . ${REPO_DIR}/
+RUN git config --global --add safe.directory ${REPO_DIR}
+
+# Set JupyterLab default directory
+WORKDIR ${REPO_DIR}
+
+# Set VSCODE default directory
+ENV CODE_WORKING_DIRECTORY=${REPO_DIR}
 
 # The entrypoint of the docker image
 COPY binder/entrypoint.sh /entrypoint.sh
