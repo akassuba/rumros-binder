@@ -63,8 +63,11 @@ SHELL [ "/bin/bash" , "-c" ]
 # Enable mosquitto
 RUN systemctl enable mosquitto.service
 
+# Install sklearn (binder container doesn't seem to work with apt version)
+RUN pip install scikit-learn
+
 # Create Python venv
-RUN python3 -m venv --system-site-packages "$REPO_DIR"/venv
+RUN python3 -m venv --system-site-packages "$REPO_DIR"/rumros/webapp/venv
 
 # Clone repository
 RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
@@ -106,7 +109,7 @@ RUN cd "$REPO_DIR"/rumros/ros/rumros_swarm_ws \
     && colcon build
 
 # Setup webapp
-RUN source "$REPO_DIR"/venv/bin/activate \
+RUN source "$REPO_DIR"/rumros/webapp/venv/bin/activate \
     && pip install -r "$REPO_DIR"/rumros/webapp/requirements.txt
 
 # The entrypoint of the docker image
