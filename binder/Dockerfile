@@ -60,8 +60,11 @@ RUN apt-get install -y \
 # Change the default shell to Bash
 SHELL [ "/bin/bash" , "-c" ]
 
+# Enable mosquitto
+RUN systemctl enable mosquitto.service
+
 # Create Python venv
-RUN python3 -m venv "$REPO_DIR"/venv
+RUN python3 -m venv --system-site-packages "$REPO_DIR"/venv
 
 # Clone repository
 RUN git clone --recursive https://github.com/sebastiangoetz/RuMROS.git "$REPO_DIR"/rumros \
