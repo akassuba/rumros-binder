@@ -4,8 +4,9 @@ FROM intel4coro/jupyter-ros2:jazzy-py3.12
 USER root
 ENV PATH=$HOME/.local/bin:$PATH
 
-EXPOSE 1883 # MQTT
-EXPOSE 5000 # Web interface
+# Expose MQTT and web interface
+EXPOSE 1883
+EXPOSE 5000
 
 ENV REPO_DIR=/app
 
